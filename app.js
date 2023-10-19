@@ -215,7 +215,6 @@ function mouseClick(e){
         // kingImage.classList.add('king-image');
         // e.target.classList.add('king')
         // e.target.appendChild(kingImage);
-    
 // -------------------------------------------------------------------------
 
     }
@@ -365,7 +364,8 @@ function handleDropDrag(e){
     if(isKing){ 
         let canCapture
         
-        canCapture = checkKingValidMoves(correctGo)
+        // canCapture = checkKingValidMoves(correctGo)
+        console.log(kingValidMoves)
         if(kingValidMoves.includes(e.target) && correctGo){
             pieceJumping = draggedElement
             if(capturedUL && kingUpLeftValidMoves.includes(e.target)){
@@ -419,8 +419,6 @@ function handleDropDrag(e){
                 removePiece(capturedDR.firstChild)
                 pieceJumping = draggedElement
             }
-
-            console.log(pieceJumping)
             
             
             startPositionId = Number(e.target.getAttribute('square-id'))
