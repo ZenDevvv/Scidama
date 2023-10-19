@@ -207,24 +207,19 @@ allSquares.forEach(square => {
 // }
 
 
-
-
-
-
 function mouseClick(e){
     if(e.target.classList.contains('piece')){
 //  --------  all piece becomes king (for testing only. comment this out)----
-            // const kingImage = document.createElement('img');
-            // kingImage.src = 'assets/crown.png'; 
-            // kingImage.classList.add('king-image');
-            // e.target.classList.add('king')
-            // e.target.appendChild(kingImage);
+        // const kingImage = document.createElement('img');
+        // kingImage.src = 'assets/crown.png'; 
+        // kingImage.classList.add('king-image');
+        // e.target.classList.add('king')
+        // e.target.appendChild(kingImage);
     
 // -------------------------------------------------------------------------
 
     }
 }
-
 
 
 function mouseOver(e){
@@ -425,17 +420,22 @@ function handleDropDrag(e){
                 pieceJumping = draggedElement
             }
 
-            if(kingsRow.includes(targetId) && !pieceJumping){
-                makeKing(e.target)
-            }
+            console.log(pieceJumping)
+            
             
             startPositionId = Number(e.target.getAttribute('square-id'))
             const isCaptureValid = validCaptures()
-
-            if((!isCaptureValid && (upLeftSkipMoves.includes(e.target) || upRightSkipMoves.includes(e.target) || downLeftSkipMoves.includes(e.target) || downRightSkipMoves.includes(e.target)))) {
-                changePlayer()
-                clear()
+            if(!isCaptureValid){
+                if(kingsRow.includes(targetId)){
+                    makeKing(e.target)
+                }
+                if((upLeftSkipMoves.includes(e.target) || upRightSkipMoves.includes(e.target) || downLeftSkipMoves.includes(e.target) || downRightSkipMoves.includes(e.target))) {
+                    changePlayer()
+                    clear()
+                }
             }
+
+            
 
         } else {
             clear()
@@ -606,7 +606,6 @@ function checkIfValidMove() {
     const upleft = document.querySelector(`[square-id="${startId + width + 1}"]`)
     const upright = document.querySelector(`[square-id="${startId + width - 1}"]`)
 
-    console.log(startId, startId)
     if(!upleft.firstChild || !upright.firstChild){
         if (!upleft.firstChild && !leftLimit.includes(startPositionId)){
             normalValidMoves.push(upleft) 
