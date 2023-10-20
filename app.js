@@ -1,12 +1,23 @@
 const gameBoard = document.querySelector("#gameboard")
 const playerDisplay = document.querySelector("#player")
 const infoDisplay = document.querySelector("#info-display")
+const redScoreBoard = document.querySelector(".red-score")
+const blueScoreBoard = document.querySelector(".blue-score")
 const width = 8
+
+const pesoValue = 3
+
+
 let playerGo = 'red'
 let opponentGo = 'blue'
 let correctGo
 playerDisplay.textContent = 'red'
 
+let blueScore = 0
+let redScore = 0
+
+const attackPiece = {type: '', value: 0}
+const defendPiece = {type: '', value: 0}
 
 
 
@@ -143,7 +154,6 @@ function gameState(){
                         obligadoKaon.push(pieceJumping)
                     } else if(isCaptureValid){
                         obligadoKaon.push(square.firstChild)
-                        // console.log('cap')
                     }
                 }
             }
@@ -210,11 +220,11 @@ allSquares.forEach(square => {
 function mouseClick(e){
     if(e.target.classList.contains('piece')){
 //  --------  all piece becomes king (for testing only. comment this out)----
-        // const kingImage = document.createElement('img');
-        // kingImage.src = 'assets/crown.png'; 
-        // kingImage.classList.add('king-image');
-        // e.target.classList.add('king')
-        // e.target.appendChild(kingImage);
+        const kingImage = document.createElement('img');
+        kingImage.src = 'assets/crown.png'; 
+        kingImage.classList.add('king-image');
+        e.target.classList.add('king')
+        e.target.appendChild(kingImage);
 // -------------------------------------------------------------------------
 
     }
@@ -236,12 +246,10 @@ function mouseOut(e){
 }
 
 
-
-
 function handleDragStart(target){
     startPositionId = Number(target.parentNode.getAttribute('square-id'))
     draggedElement = target
-    eatingElement = draggedElement
+    eatingElement = draggedElement.parentNode
     correctGo = target.firstChild.classList.contains(playerGo)
 }
 
@@ -274,6 +282,7 @@ let initialY = 0;
 
 function dragStart (e) {
     draggedElement = e.target;
+    e.dataTransfer.setDragImage(draggedElement, 37,37);
     
 
     clear()
@@ -281,6 +290,8 @@ function dragStart (e) {
 
     if(obligadoKaon.length){
         if(obligadoKaon.includes(e.target)){
+            getPieceValue(draggedElement, attackPiece)
+
             redToNormal()
             handleDragStart(e.target)
 
@@ -364,8 +375,6 @@ function handleDropDrag(e){
     if(isKing){ 
         let canCapture
         
-        // canCapture = checkKingValidMoves(correctGo)
-        console.log(kingValidMoves)
         if(kingValidMoves.includes(e.target) && correctGo){
             pieceJumping = draggedElement
             if(capturedUL && kingUpLeftValidMoves.includes(e.target)){
@@ -381,10 +390,10 @@ function handleDropDrag(e){
                 capturedPieces.push(capturedDR)
                 removePiece(capturedDR)
             }
+            calculatePoints(e.target)
             e.target.append(draggedElement)
-            eatingElement = draggedElement
-            
-            
+            eatingElement = draggedElement.parentNode
+
             canCapture = checkKingValidMoves(e.target, correctGo)
 
             if(!capturedPieces.length){
@@ -402,25 +411,27 @@ function handleDropDrag(e){
         const isCaptureValid = validCaptures()
 
         if(isCaptureValid) {
-            if(upLeftSkipMoves.includes(e.target)){
-                e.target.append(draggedElement)
-                removePiece(capturedUL.firstChild)
-                pieceJumping = draggedElement
-            } else if (upRightSkipMoves.includes(e.target)){
-                e.target.append(draggedElement)
-                removePiece(capturedUR.firstChild)
-                pieceJumping = draggedElement
-            }else if(downLeftSkipMoves.includes(e.target)){
-                e.target.append(draggedElement)
-                removePiece(capturedDL.firstChild)
-                pieceJumping = draggedElement
-            } else if(downRightSkipMoves.includes(e.target)){
-                e.target.append(draggedElement)
-                removePiece(capturedDR.firstChild)
-                pieceJumping = draggedElement
+            if(normalValidMoves.includes(e.target)){
+                if(upLeftSkipMoves.includes(e.target)){
+                    e.target.append(draggedElement)
+                    removePiece(capturedUL.firstChild)
+                    pieceJumping = draggedElement
+                } else if (upRightSkipMoves.includes(e.target)){
+                    e.target.append(draggedElement)
+                    removePiece(capturedUR.firstChild)
+                    pieceJumping = draggedElement
+                }else if(downLeftSkipMoves.includes(e.target)){
+                    e.target.append(draggedElement)
+                    removePiece(capturedDL.firstChild)
+                    pieceJumping = draggedElement
+                } else if(downRightSkipMoves.includes(e.target)){
+                    e.target.append(draggedElement)
+                    removePiece(capturedDR.firstChild)
+                    pieceJumping = draggedElement
+                }
             }
             
-            
+            calculatePoints(e.target)
             startPositionId = Number(e.target.getAttribute('square-id'))
             const isCaptureValid = validCaptures()
             if(!isCaptureValid){
@@ -452,16 +463,22 @@ function handleDropDrag(e){
         }
     }
 
-    if(eatenBluePiece.length == 12){
-        window.alert('Red wins!\nWew Galinga Red Oy Mura Mag WTF')
-    }
-    else if(eatenRedPiece.length == 12){
-        window.alert('Blue wins!\nWew Galinga Blue Oy Mura Mag WTF')
+
+//----------------------------------------------WIN CONDITION------------------------
+    if(eatenBluePiece.length == 12 || eatenRedPiece.length == 12){
+        if(redScore > blueScore){
+            window.alert('Red wins!\nWew Galinga Red Oy Mura Mag WTF')
+        }else if(redScore < blueScore){
+            window.alert('Blue wins!\nWew Galinga Blue Oy Mura Mag WTF')
+        }else{
+            window.alert('DRAW DRAW DRAW is this even possible?')
+        }
     }
 }
 
 
 function removePiece(piece){
+    getPieceValue(piece, defendPiece)
     if(opponentGo == 'blue'){
         eatenBluePiece.push(piece)
     }else{
@@ -524,7 +541,6 @@ function checkUpRight() {
             !upLimit.includes(uprightId) && !rightLimit.includes(uprightId) &&
             !uprightSkip.firstChild) {
 
-
             upRightSkipMoves.push(uprightSkip);
             normalValidMoves.push(uprightSkip)
             capturedUR = upright
@@ -550,7 +566,6 @@ function checkDownLeft() {
             draggedElement.firstChild.classList.contains(playerGo) &&
             !downLimit.includes(downleftId) && !leftLimit.includes(downleftId) &&
             !downleftSkip.firstChild) {
-
 
             downLeftSkipMoves.push(downleftSkip);
             normalValidMoves.push(downleftSkip)
@@ -579,7 +594,6 @@ function checkDownRight() {
             draggedElement.firstChild.classList.contains(playerGo) &&
             !downLimit.includes(downrightId) && !rightLimit.includes(downrightId) &&
             !downrightSkip.firstChild) {
-
 
             downRightSkipMoves.push(downrightSkip);
             normalValidMoves.push(downrightSkip)
@@ -655,6 +669,7 @@ function squareOnDownRightLimit(square){
 
 
 
+
 ////--------------------------------------------CHECK KING VALID MOVES------------------
 function checkKingValidMoves(correctGo){
     const state1 = checkKingValidMoveUpLeft(correctGo)
@@ -665,30 +680,47 @@ function checkKingValidMoves(correctGo){
     if(state1 || state2 || state3 || state4){
         kingValidMoves = []
         if (state1){
-            capturedUL = eatingElement = state1.firstChild
+            eatingElement = state1
+            capturedUL = state1.firstChild
             checkKingValidMoveUpLeft(correctGo)
         }
         if (state2){
-            capturedUR = eatingElement = state2.firstChild
+            eatingElement = state2
+           capturedUR = state2.firstChild
             checkKingValidMoveUpRight(correctGo)
         }
         if (state3){
-            capturedDL = eatingElement = state3.firstChild
+            eatingElement = state3
+            capturedDL = state3.firstChild
             checkKingValidMoveDownLeft(correctGo)
         }
         if (state4){
-            capturedDR = eatingElement = state4.firstChild
+            eatingElement = state4
+            capturedDR = state4.firstChild
             checkKingValidMoveDownRight(correctGo)
         }
-    
         return true
     }
     return false
 }
 
+function checkComboKingUpLeft(correctGo){
+    let skip
+
+    do{
+        let skip = getSkipSquareUpLeft(eatingElement)
+        eatingElement = skip
+        if(checkKingValidMoveDownLeft(correctGo)){
+            kingValidMoves.push(skip)
+        }else if(checkKingValidMoveUpRight){
+            kingValidMoves.push(skip)
+        }
+    }while(!skip.firstChild && !squareOnUpLeftLimit(skip))
+}
+
 function checkKingValidMoveUpLeft(correctGo) {    
     // -----------------------------------------------checks upper left moves of a king--------------------
-    let kingSquare = eatingElement.parentNode   //<----- BUG
+    let kingSquare = eatingElement  //<----- BUG
     if(correctGo){
         let skip = kingSquare
 
@@ -700,6 +732,7 @@ function checkKingValidMoveUpLeft(correctGo) {
             }else if(!skip.firstChild){
                 kingValidMoves.push(skip)
                 kingUpLeftValidMoves.push(skip)
+                
             } else if(skip.firstChild.firstChild.classList.contains(opponentGo)  && !squareOnUpLeftLimit(skip) &&!getSkipSquareUpLeft(skip).firstChild) {
                 return skip
             }
@@ -718,7 +751,7 @@ function getSkipSquareUpLeft(kingSquare) {
 
 // -----------------------------------------------checks upper right moves of a king--------------------
 function checkKingValidMoveUpRight(correctGo) {
-    let kingSquare = eatingElement.parentNode
+    let kingSquare = eatingElement
     if(correctGo){
         let skip = kingSquare
 
@@ -746,7 +779,7 @@ function getSkipSquareUpRight(kingSquare) {
 
 // -----------------------------------------------checks down left moves of a king--------------------
 function checkKingValidMoveDownLeft(correctGo) {
-    let kingSquare = eatingElement.parentNode
+    let kingSquare = eatingElement
     if(correctGo){
         let skip = kingSquare
 
@@ -774,7 +807,7 @@ function getSkipSquareDownLeft(kingSquare) {
 
 // -----------------------------------------------checks down right moves of a king--------------------
 function checkKingValidMoveDownRight(correctGo) {
-    let kingSquare = eatingElement.parentNode
+    let kingSquare = eatingElement
     if(correctGo){
         let skip = kingSquare
 
@@ -855,4 +888,229 @@ function makeKing(target) {
   
     target.firstChild.classList.add('king')
     target.firstChild.appendChild(kingImage);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function updateScoreBoard(result){
+    if(playerGo === 'red'){
+        console.log('Red Scoreboard:',redScore,'+',result,'=', redScore+result,'\n\n----------------------------')
+        redScore += result
+        redScoreBoard.textContent = redScore
+    }else{
+        console.log('Blue Scoreboard:',blueScore,'+',result,'=', blueScore+result,'\n\n----------------------------')
+        blueScore += result
+        blueScoreBoard.textContent = blueScore
+    }
+}
+
+function logHistory(){
+
+}
+
+
+function calculatePoints(target){
+    if(ifSamePieceType()){
+        if(target.classList.contains('add')){
+            result = attackPiece.value + defendPiece.value
+            console.log(attackPiece.type,attackPiece.value ,'+', defendPiece.type,defendPiece.value ,'=', result)
+            if(draggedElement.classList.contains('king')){
+                console.log('King piece',result,'*',2,'=',result*2)
+                result *= 2
+            }
+            if(attackPiece.type === 'kwh'){
+                console.log('kwh convert to Peso ',result,'*',pesoValue, '=', result*pesoValue)
+                result*=pesoValue
+            }
+            updateScoreBoard(result)
+        } else if(target.classList.contains('subtract')){
+            result = attackPiece.value - defendPiece.value
+            if(!(result < 0)) {
+                console.log(attackPiece.type,attackPiece.value ,'-', defendPiece.type,defendPiece.value ,'=', result)
+                if(draggedElement.classList.contains('king')){
+                    console.log('King piece',result,'*',2,'=',result*2)
+                    result *= 2
+                }
+                if(attackPiece.type === 'kwh'){
+                    console.log('kwh convert to Peso ',result,'*',pesoValue, '=', result*pesoValue)
+                    result*=pesoValue
+                }
+            }else{
+                result = 0
+                console.log(attackPiece.type,attackPiece.value ,'-', defendPiece.type,defendPiece.value ,'= No score')
+            }
+            updateScoreBoard(result)
+        }else if(target.classList.contains('multiply')){
+            console.log(attackPiece.type,attackPiece.value ,'*', defendPiece.type,defendPiece.value ,'= No score\n\n----------------------------')
+        }else if(target.classList.contains('divide')){
+            result = attackPiece.value / defendPiece.value
+            console.log(attackPiece.type,attackPiece.value ,'/', defendPiece.type,defendPiece.value ,'= No score\n\n----------------------------')
+        }
+    }else{
+        console.log(attackPiece.type,attackPiece.value ,'+', defendPiece.type,defendPiece.value,'=','No score\n\n----------------------------')
+    }
+}
+
+function ifSamePieceType(){
+    if(attackPiece.type === defendPiece.type){
+        return true
+    }
+}
+
+
+function ifElementIdInBlue(id){
+    const isit = ['bkwh3', 'bp6', 'bkwh9', 'bp12', 'bp8', 'bkwh11', 'bp4', 'bkwh1', 'bkwh5', 'bp2', 'bkwh7', 'bp10'].includes(id)
+    // console.log(isit)
+    return isit
+
+}
+
+
+function getPieceValue(target, pieceToUpdate){
+    elementId = target.getAttribute('id')
+    // console.log(elementId)
+
+    if(ifElementIdInBlue(elementId)){
+        switch(elementId){
+            case 'bkwh3':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 3
+                break;
+            
+            case 'bp6':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 6
+                break;
+
+            case 'bkwh9':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 9
+                break;
+            
+            case 'bp12':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 12
+                break;      
+                
+            case 'bp8':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 8
+                break;
+
+            case 'bkwh11':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 11
+                break;
+
+            case 'bp4':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 4
+                break;
+
+            case 'bkwh1':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 1
+                break;
+
+            case 'bkwh5':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 5
+                break;
+
+            case 'bp2':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 2
+                break;
+
+            case 'bkwh7':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 7
+                break;
+
+            case 'bp10':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 10
+                break;
+        }   
+
+    }else{
+        switch(elementId){
+            case 'rkwh3':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 3
+                break;
+            
+            case 'rp6':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 6
+                break;
+
+            case 'rkwh9':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 9
+                break;
+            
+            case 'rp12':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 12
+                break;      
+                
+            case 'rp8':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 8
+                break;
+
+            case 'rkwh11':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 11
+                break;
+
+            case 'rp4':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 4
+                break;
+
+            case 'rkwh1':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 1
+                break;
+
+            case 'rkwh5':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 5
+                break;
+
+            case 'rp2':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 2
+                break;
+
+            case 'rkwh7':
+                pieceToUpdate.type = 'kwh'
+                pieceToUpdate.value = 7
+                break;
+
+            case 'rp10':
+                pieceToUpdate.type = 'P'
+                pieceToUpdate.value = 10
+                break;
+        }   
+    }
+
+
 }
