@@ -465,9 +465,9 @@ function handleDropDrag(e){
 
 //----------------------------------------------WIN CONDITION------------------------
     if(eatenBluePiece.length == 12 || eatenRedPiece.length == 12){
-        if(redScore > blueScore){
+        if(redScore < blueScore){
             window.alert('Red wins!\nWew Galinga Red Oy Mura Mag WTF')
-        }else if(redScore < blueScore){
+        }else if(redScore > blueScore){
             window.alert('Blue wins!\nWew Galinga Blue Oy Mura Mag WTF')
         }else{
             window.alert('DRAW DRAW DRAW is this even possible?')
