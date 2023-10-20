@@ -220,13 +220,12 @@ allSquares.forEach(square => {
 function mouseClick(e){
     if(e.target.classList.contains('piece')){
 //  --------  all piece becomes king (for testing only. comment this out)----
-        const kingImage = document.createElement('img');
-        kingImage.src = 'assets/crown.png'; 
-        kingImage.classList.add('king-image');
-        e.target.classList.add('king')
-        e.target.appendChild(kingImage);
+        // const kingImage = document.createElement('img');
+        // kingImage.src = 'assets/crown.png'; 
+        // kingImage.classList.add('king-image');
+        // e.target.classList.add('king')
+        // e.target.appendChild(kingImage);
 // -------------------------------------------------------------------------
-
     }
 }
 
