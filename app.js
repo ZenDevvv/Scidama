@@ -18,11 +18,11 @@ let redScore = 0
 
 const attackPiece = {type: '', value: 0}
 const defendPiece = {type: '', value: 0}
+const remainingPiece = {type: '', value: 0}
 
 
-
-let eatenBluePiece = []
-let eatenRedPiece = []
+let bluePieceLeft = []
+let redPieceLeft = []
 
 
 let kingValidMoves = []
@@ -93,11 +93,13 @@ function createBoard() {
         if ( i <= 23){
             if(square.firstChild){
                 square.firstChild.firstChild.classList.add("blue")
+                bluePieceLeft.push(square.firstChild)
             }
         }
         if ( i >= 40){
             if(square.firstChild){
                 square.firstChild.firstChild.classList.add("red")
+                redPieceLeft.push(square.firstChild)
             }
         }
 
@@ -159,18 +161,6 @@ function gameState(){
             }
         }
 
-        // if(square.firstChild){ 
-        //     square.addEventListener('click', function() {
-                
-        //         clear()
-        //         if(square.firstChild && square.firstChild.firstChild.classList.contains(playerGo)){
-        //             console.log(square)  
-        //             handleDragStart(square.firstChild)
-        //             const isKing = square.firstChild.classList.contains('king')
-        //             if(isKing){
-        //                 checkKingValidMoves(correctGo)
-        //                 console.log(kingValidMoves)
-
     });
 }
 
@@ -181,44 +171,96 @@ function ifPlayersTurn(target){
 }
 
 
+
+
+function touchStart(e){
+    console.log(e.target)
+    handleDragStart(e.target)
+
+    clear()
+    const isKing = e.target.classList.contains('king')
+
+    if(obligadoKaon.length){
+        if(obligadoKaon.includes(e.target)){
+            getPieceValue(draggedElement, attackPiece)
+
+            redToNormal()
+            handleDragStart(e.target)
+
+            if(isKing){
+                checkKingValidMoves(correctGo)
+                drawKingValidMoves()
+
+            }else{
+                validCaptures()
+                drawNormalValidMoves()
+            }
+        }else{
+            drawObligadoKaon()
+            invalidMove()
+    
+        }
+    }else{
+        handleDragStart(e.target)
+        
+        if(e.target.firstChild.classList.contains(playerGo)){
+            if(isKing){
+                checkKingValidMoves(correctGo)
+                drawKingValidMoves()
+            }else{
+                checkIfValidMove()
+                drawNormalValidMoves()
+
+            }
+
+        }else{
+            //shake the board
+        }
+    } 
+}
+
+
+function touchend(e){
+    console.log(e)
+}
+
+function touchmove(e){
+    // console.log(e)
+}
+
+
+
+
 const allSquares = document.querySelectorAll(".square")
 
 allSquares.forEach(square => {
     square.addEventListener('dragstart', dragStart)
+    square.addEventListener('touchstart', touchStart)
+
     // square.addEventListener('drag', whileDrag)
     // square.addEventListener('dragend', dragEnd)
 
     square.addEventListener('dragover', dragOver)
+    square.addEventListener('touchmove', touchmove)
+
     square.addEventListener('drop', dragDrop)
+    square.addEventListener('touchend', touchend)
+
     square.addEventListener('mouseover', mouseOver)
     square.addEventListener('mouseout', mouseOut)
     square.addEventListener('click', mouseClick)
 })
 
-
-// function whileDrag(e){
-//     if (draggedElement) {
-//         // Update the element's position to follow the cursor
-//         draggedElement.style.display = 'block';
-//         draggedElement.style.position = 'fixed';
-//         draggedElement.style.left = e.clientX + 'px';
-//         draggedElement.style.top = e.clientY + 'px';
-//     }
-// }
-
-// function dragEnd(e){
-//     if (draggedElement) {
-//         draggedElement.style.position = 'static';
-//         draggedElement.style.left = '';
-//         draggedElement.style.top = '';
-//         draggedElement.style.display = 'block';
-//         draggedElement = null;
-//     }
-// }
+function transparentize(e){
+    e.target.style.opacity = 1
+}
 
 
 function mouseClick(e){
     if(e.target.classList.contains('piece')){
+        
+        setTimeout(() => transparentize(e), 2000)
+        e.target.style.opacity = .5
 //  --------  all piece becomes king (for testing only. comment this out)----
         // const kingImage = document.createElement('img');
         // kingImage.src = 'assets/crown.png'; 
@@ -276,8 +318,8 @@ function invalidMove(){
 }
 
 
-let initialX = 0;
-let initialY = 0;
+// let initialX = 0;
+// let initialY = 0;
 
 function dragStart (e) {
     draggedElement = e.target;
@@ -464,26 +506,66 @@ function handleDropDrag(e){
 
 
 //----------------------------------------------WIN CONDITION------------------------
-    if(eatenBluePiece.length == 12 || eatenRedPiece.length == 12){
-        if(redScore < blueScore){
-            window.alert('Red wins!\nWew Galinga Red Oy Mura Mag WTF')
-        }else if(redScore > blueScore){
-            window.alert('Blue wins!\nWew Galinga Blue Oy Mura Mag WTF')
-        }else{
-            window.alert('DRAW DRAW DRAW is this even possible?')
-        }
+    if(bluePieceLeft.length == 0 || redPieceLeft.length == 0){
+        winCondition()
     }
+}
+
+function calculateRemainingPiece(){
+    let score
+    if(remainingPiece.type === 'kwh'){
+        score = remainingPiece.value*pesoValue
+    }else{
+        score = remainingPiece.value
+    }
+    return score
+}
+
+function winCondition(){
+    let result = 0
+    if(bluePieceLeft.length == 0){
+        redPieceLeft.forEach(piece => {
+            getPieceValue(piece, remainingPiece)
+            result += calculateRemainingPiece()
+            console.log(result,piece.getAttribute('id'))
+        })
+    }else{
+        bluePieceLeft.forEach(piece => {
+            getPieceValue(piece, remainingPiece)
+            result += calculateRemainingPiece()
+            console.log(result,piece.getAttribute('id'))
+        })
+    }
+    changePlayer()
+    updateScoreBoard(result)
+    
+    setTimeout(() => showWin(), 1000)
+}
+
+function showWin(){
+    if(redScore < blueScore){
+        window.alert('RED WINS!')
+    }else if(redScore > blueScore){
+        window.alert('BLUE WINS!')
+    }else{
+        window.alert('DRAW DRAW DRAW is this even possible?')
+    }
+}
+
+function removeFromArray(array, toRemove){
+    const newArray = array.filter(item => item != toRemove)
+    return newArray
 }
 
 
 function removePiece(piece){
     getPieceValue(piece, defendPiece)
-    if(opponentGo == 'blue'){
-        eatenBluePiece.push(piece)
-    }else{
-        eatenRedPiece.push(piece)
-    }
     piece.remove()
+    if(opponentGo == 'blue'){
+        bluePieceLeft = removeFromArray(bluePieceLeft, piece)
+    }else{
+        redPieceLeft = removeFromArray(redPieceLeft, piece)
+    }
 }
 
 
@@ -890,22 +972,6 @@ function makeKing(target) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function updateScoreBoard(result){
     if(playerGo === 'red'){
         console.log('Red Scoreboard:',redScore,'+',result,'=', redScore+result,'\n\n----------------------------')
@@ -1110,6 +1176,4 @@ function getPieceValue(target, pieceToUpdate){
                 break;
         }   
     }
-
-
 }
