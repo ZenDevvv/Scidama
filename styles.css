@@ -163,9 +163,10 @@ span {
 
 .king-image {
     position: absolute;
-    left: 13px;
-    top: -15px;
-    height: 25px;
+    left: -8px;
+    top: -22px;
+    height: 40px;
+    transform: rotate(-10deg);
 }
 
 .square.multiply {

@@ -503,16 +503,14 @@ function handleDropDrag(e){
             clear()
             const valid = checkIfValidMove()
             if (valid && correctGo && normalValidMoves.includes(e.target)) {
-                
                 playSoundEffect('move-normal001')
                 e.target.append(draggedElement)
                 e.target.getAttribute('square-id')
-                changePlayer()
-                clear()
-
                 if(kingsRow.includes(targetId)){
                     makeKing(e.target)
                 }
+                changePlayer()
+                clear()
             }
         }
     }
@@ -716,6 +714,7 @@ function checkIfValidMove() {
     const upright = document.querySelector(`[square-id="${startId + width - 1}"]`)
 
     if(!upleft.firstChild || !upright.firstChild){
+        console.log(startPositionId)
         if (!upleft.firstChild && !leftLimit.includes(startPositionId)){
             normalValidMoves.push(upleft) 
         }
@@ -982,8 +981,13 @@ function clear(){
 
 function makeKing(target) {
     playSoundEffect('move-promotion001')
+
     const kingImage = document.createElement('img');
-    kingImage.src = 'assets/crown.png'; // Set the path to your crown image
+    if(playerGo == 'blue'){
+        kingImage.src = 'assets/blue_crown.png'; // Set the path to your crown image
+    }else{
+        kingImage.src = 'assets/red_crown.png'; // Set the path to your crown image
+    }
     kingImage.classList.add('king-image');
   
     target.firstChild.classList.add('king')
