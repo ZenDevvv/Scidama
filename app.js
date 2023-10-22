@@ -47,6 +47,7 @@ const upLimit = [56, 57, 58, 59, 60, 61, 62, 63]
 const leftLimit = [7, 15, 23, 31, 39, 47, 55, 63]
 const downLimit = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 const rightLimit = [0, 8, 16, 24, 32, 40, 48, 56]
+let gameFinished = false
 
 const startPieces = [
     bkwh3, '', bp6, '', bkwh9, '', bp12, '', 
@@ -322,6 +323,9 @@ function invalidMove(){
 // let initialY = 0;
 
 function dragStart (e) {
+    if(gameFinished){
+        location.reload();
+    }
     draggedElement = e.target;
     e.dataTransfer.setDragImage(draggedElement, 37,37);
     
@@ -374,15 +378,15 @@ function dragOver (e){
 }
 
 function dragDrop (e) {
-    e.stopPropagation()
-    
-    yellowToNormal()
-    
 
+    e.stopPropagation()
+
+    yellowToNormal()
     handleDropDrag(e) 
     gameState() 
     clear() 
 }
+    
 
 
 function redToNormal(){
@@ -552,6 +556,7 @@ function winCondition(){
     setTimeout(() => showWin(), 1000)
 }
 
+
 function showWin(){
     if(redScore < blueScore){
         window.alert('RED WINS!')
@@ -560,6 +565,7 @@ function showWin(){
     }else{
         window.alert('DRAW DRAW DRAW is this even possible?')
     }
+    gameFinished = true
 }
 
 function removeFromArray(array, toRemove){
