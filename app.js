@@ -345,6 +345,7 @@ function dragStart (e) {
                 drawNormalValidMoves()
             }
         }else{
+            playSoundEffect('move-illegal001')
             drawObligadoKaon()
             invalidMove()
             // setTimeout(() => redToNormal(), 3000)
@@ -360,7 +361,6 @@ function dragStart (e) {
             }else{
                 checkIfValidMove()
                 drawNormalValidMoves()
-
             }
 
         }else{
@@ -418,19 +418,26 @@ function handleDropDrag(e){
         
         if(kingValidMoves.includes(e.target) && correctGo){
             pieceJumping = draggedElement
-            if(capturedUL && kingUpLeftValidMoves.includes(e.target)){
-                capturedPieces.push(capturedUL)
-                removePiece(capturedUL)
-            }else if(capturedUR && kingUpRightValidMoves.includes(e.target)){
-                capturedPieces.push(capturedUR)
-                removePiece(capturedUR)
-            }else if(capturedDL && kingDownLeftValidMoves.includes(e.target)){
-                capturedPieces.push(capturedDL)
-                removePiece(capturedDL)
-            }else if(capturedDR && kingDownRightValidMoves.includes(e.target)){
-                capturedPieces.push(capturedDR)
-                removePiece(capturedDR)
+
+            if(capturedUL || capturedUR || capturedDL || capturedDR){
+                playSoundEffect('move-kingattack001')
+                if(capturedUL && kingUpLeftValidMoves.includes(e.target)){
+                    capturedPieces.push(capturedUL)
+                    removePiece(capturedUL)
+                }else if(capturedUR && kingUpRightValidMoves.includes(e.target)){
+                    capturedPieces.push(capturedUR)
+                    removePiece(capturedUR)
+                }else if(capturedDL && kingDownLeftValidMoves.includes(e.target)){
+                    capturedPieces.push(capturedDL)
+                    removePiece(capturedDL)
+                }else if(capturedDR && kingDownRightValidMoves.includes(e.target)){
+                    capturedPieces.push(capturedDR)
+                    removePiece(capturedDR)
+                }
+            }else{
+                playSoundEffect('move-king001')
             }
+
             calculatePoints(e.target)
             e.target.append(draggedElement)
             eatingElement = draggedElement.parentNode
@@ -453,6 +460,7 @@ function handleDropDrag(e){
 
         if(isCaptureValid) {
             if(normalValidMoves.includes(e.target)){
+                playSoundEffect('move-attack001')
                 if(upLeftSkipMoves.includes(e.target)){
                     e.target.append(draggedElement)
                     removePiece(capturedUL.firstChild)
@@ -492,6 +500,7 @@ function handleDropDrag(e){
             const valid = checkIfValidMove()
             if (valid && correctGo && normalValidMoves.includes(e.target)) {
                 
+                playSoundEffect('move-normal001')
                 e.target.append(draggedElement)
                 e.target.getAttribute('square-id')
                 changePlayer()
@@ -507,6 +516,7 @@ function handleDropDrag(e){
 
 //----------------------------------------------WIN CONDITION------------------------
     if(bluePieceLeft.length == 0 || redPieceLeft.length == 0){
+        playSoundEffect('endgame_win001')
         winCondition()
     }
 }
@@ -960,9 +970,12 @@ function clear(){
     kingUpRightValidMoves = []
     kingDownLeftValidMoves = []
     kingDownRightValidMoves = []
+    attackPiece.type = ''
+    defendPiece.value = 0
 }
 
 function makeKing(target) {
+    playSoundEffect('move-promotion001')
     const kingImage = document.createElement('img');
     kingImage.src = 'assets/crown.png'; // Set the path to your crown image
     kingImage.classList.add('king-image');
@@ -1176,4 +1189,10 @@ function getPieceValue(target, pieceToUpdate){
                 break;
         }   
     }
+}
+
+
+function playSoundEffect(soundEffectId){
+    const soundEffect = document.getElementById(soundEffectId)
+    soundEffect.play()
 }
