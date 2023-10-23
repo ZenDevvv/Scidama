@@ -4,8 +4,9 @@ const infoDisplay = document.querySelector("#info-display")
 const redScoreBoard = document.querySelector(".red-score")
 const blueScoreBoard = document.querySelector(".blue-score")
 const width = 8
-
 const pesoValue = 3
+
+
 
 
 let playerGo = 'red'
@@ -175,7 +176,6 @@ function ifPlayersTurn(target){
 
 
 function touchStart(e){
-    console.log(e.target)
     handleDragStart(e.target)
 
     clear()
@@ -259,7 +259,6 @@ function transparentize(e){
 
 function mouseClick(e){
     if(e.target.classList.contains('piece')){
-        
         setTimeout(() => transparentize(e), 2000)
         e.target.style.opacity = .5
 //  --------  all piece becomes king (for testing only. comment this out)----
@@ -269,6 +268,21 @@ function mouseClick(e){
         // e.target.classList.add('king')
         // e.target.appendChild(kingImage);
 // -------------------------------------------------------------------------
+    }
+}
+
+function appendHistory(history){
+    // history = 'Div in the move history'
+    const newDiv = document.createElement('div');
+    const moveHistoryContent = document.getElementById('move-history-content');
+    newDiv.textContent = history;
+    moveHistoryContent.appendChild(newDiv);
+    moveHistoryContent.scrollTop = moveHistoryContent.scrollHeight;
+    newDiv.style.width = '100%';
+    if(playerGo === 'red'){
+        newDiv.style.backgroundColor = '#e19898'; // Use a valid color code (e.g., '#e19898')
+    }else {
+        newDiv.style.backgroundColor = '#929ad7'; // Use a valid color code (e.g., '#e19898')
     }
 }
 
@@ -293,6 +307,7 @@ function handleDragStart(target){
     draggedElement = target
     eatingElement = draggedElement.parentNode
     correctGo = target.firstChild.classList.contains(playerGo)
+    
 }
 
 function drawObligadoKaon(){
@@ -358,6 +373,7 @@ function dragStart (e) {
     }else{
         handleDragStart(e.target)
         
+        
         if(e.target.firstChild.classList.contains(playerGo)){
             if(isKing){
                 checkKingValidMoves(correctGo)
@@ -421,6 +437,7 @@ function handleDropDrag(e){
         let canCapture
         
         if(kingValidMoves.includes(e.target) && correctGo){
+            getPieceValue(draggedElement, attackPiece)
             pieceJumping = draggedElement
 
             if(capturedUL || capturedUR || capturedDL || capturedDR){
@@ -438,11 +455,14 @@ function handleDropDrag(e){
                     capturedPieces.push(capturedDR)
                     removePiece(capturedDR)
                 }
+                calculatePoints(e.target)
             }else{
                 playSoundEffect('move-king001')
+                
+                let [row, col] = getRowCol(e.target)
+                appendHistory(attackPiece.type+ `${attackPiece.value}->(${[row,col]})`)
             }
-
-            calculatePoints(e.target)
+            
             e.target.append(draggedElement)
             eatingElement = draggedElement.parentNode
 
@@ -482,9 +502,10 @@ function handleDropDrag(e){
                     removePiece(capturedDR.firstChild)
                     pieceJumping = draggedElement
                 }
+                calculatePoints(e.target)
             }
             
-            calculatePoints(e.target)
+            
             startPositionId = Number(e.target.getAttribute('square-id'))
             const isCaptureValid = validCaptures()
             if(!isCaptureValid){
@@ -500,9 +521,10 @@ function handleDropDrag(e){
             
 
         } else {
-            clear()
-            const valid = checkIfValidMove()
-            if (valid && correctGo && normalValidMoves.includes(e.target)) {
+            if (correctGo && normalValidMoves.includes(e.target)) {
+                getPieceValue(draggedElement, attackPiece)
+                let [row, col] = getRowCol(e.target)
+                appendHistory(attackPiece.type+ `${attackPiece.value}->(${[row,col]})`)
                 playSoundEffect('move-normal001')
                 e.target.append(draggedElement)
                 e.target.getAttribute('square-id')
@@ -538,13 +560,15 @@ function winCondition(){
     if(bluePieceLeft.length == 0){
         redPieceLeft.forEach(piece => {
             getPieceValue(piece, remainingPiece)
-            result += calculateRemainingPiece()
+            piecePoints = calculateRemainingPiece()
+            result += piecePoints
             console.log(result,piece.getAttribute('id'))
         })
     }else{
         bluePieceLeft.forEach(piece => {
             getPieceValue(piece, remainingPiece)
-            result += calculateRemainingPiece()
+            piecePoints = calculateRemainingPiece()
+            result += piecePoints
             console.log(result,piece.getAttribute('id'))
         })
     }
@@ -714,7 +738,6 @@ function checkIfValidMove() {
     const upright = document.querySelector(`[square-id="${startId + width - 1}"]`)
 
     if(!upleft.firstChild || !upright.firstChild){
-        console.log(startPositionId)
         if (!upleft.firstChild && !leftLimit.includes(startPositionId)){
             normalValidMoves.push(upleft) 
         }
@@ -1007,15 +1030,13 @@ function updateScoreBoard(result){
     }
 }
 
-function logHistory(){
-
-}
 
 
 function calculatePoints(target){
     if(ifSamePieceType()){
         if(target.classList.contains('add')){
             result = attackPiece.value + defendPiece.value
+            appendHistory(`${attackPiece.type+attackPiece.value} + ${defendPiece.type+defendPiece.value} = ${attackPiece.type}${result}`)
             console.log(attackPiece.type,attackPiece.value ,'+', defendPiece.type,defendPiece.value ,'=', result)
             if(draggedElement.classList.contains('king')){
                 console.log('King piece',result,'*',2,'=',result*2)
@@ -1029,6 +1050,7 @@ function calculatePoints(target){
         } else if(target.classList.contains('subtract')){
             result = attackPiece.value - defendPiece.value
             if(!(result < 0)) {
+                appendHistory(`${attackPiece.type+attackPiece.value} - ${defendPiece.type+defendPiece.value} = ${attackPiece.type}${result}`)
                 console.log(attackPiece.type,attackPiece.value ,'-', defendPiece.type,defendPiece.value ,'=', result)
                 if(draggedElement.classList.contains('king')){
                     console.log('King piece',result,'*',2,'=',result*2)
@@ -1040,17 +1062,33 @@ function calculatePoints(target){
                 }
             }else{
                 result = 0
+                appendHistory(`${attackPiece.type+attackPiece.value} - ${defendPiece.type+defendPiece.value} = NS`)
                 console.log(attackPiece.type,attackPiece.value ,'-', defendPiece.type,defendPiece.value ,'= No score')
             }
             updateScoreBoard(result)
+
         }else if(target.classList.contains('multiply')){
             console.log(attackPiece.type,attackPiece.value ,'*', defendPiece.type,defendPiece.value ,'= No score\n\n----------------------------')
+            appendHistory(`${attackPiece.type+attackPiece.value} * ${defendPiece.type+defendPiece.value} = NS`)
         }else if(target.classList.contains('divide')){
-            result = attackPiece.value / defendPiece.value
             console.log(attackPiece.type,attackPiece.value ,'/', defendPiece.type,defendPiece.value ,'= No score\n\n----------------------------')
+            appendHistory(`${attackPiece.type+attackPiece.value} / ${defendPiece.type+defendPiece.value} = NS`)
         }
+
     }else{
-        console.log(attackPiece.type,attackPiece.value ,'+', defendPiece.type,defendPiece.value,'=','No score\n\n----------------------------')
+        if(target.classList.contains('add')){
+            console.log(attackPiece.type,attackPiece.value ,' + ', defendPiece.type,defendPiece.value,'=','No score\n\n----------------------------')
+            appendHistory(`${attackPiece.type+attackPiece.value} + ${defendPiece.type+defendPiece.value} = NS`)
+        }else if(target.classList.contains('subtract')){
+            console.log(attackPiece.type,attackPiece.value ,' - ', defendPiece.type,defendPiece.value,'=','No score\n\n----------------------------')
+            appendHistory(`${attackPiece.type+attackPiece.value} - ${defendPiece.type+defendPiece.value} = NS`)
+        }else if(target.classList.contains('multiply')){
+            console.log(attackPiece.type,attackPiece.value ,' * ', defendPiece.type,defendPiece.value ,'= No score\n\n----------------------------')
+            appendHistory(`${attackPiece.type+attackPiece.value} * ${defendPiece.type+defendPiece.value} = NS`)
+        }else if(target.classList.contains('divide')){
+            console.log(attackPiece.type,attackPiece.value ,' / ', defendPiece.type,defendPiece.value ,'= No score\n\n----------------------------')
+            appendHistory(`${attackPiece.type+attackPiece.value} / ${defendPiece.type+defendPiece.value} = NS`)
+        }
     }
 }
 
@@ -1071,7 +1109,6 @@ function ifElementIdInBlue(id){
 
 function getPieceValue(target, pieceToUpdate){
     elementId = target.getAttribute('id')
-    // console.log(elementId)
 
     if(ifElementIdInBlue(elementId)){
         switch(elementId){
@@ -1199,6 +1236,22 @@ function getPieceValue(target, pieceToUpdate){
                 break;
         }   
     }
+}
+
+function getRowCol(target){
+
+    const squareId = target.getAttribute('square-id')
+    let row, col
+    
+    if(playerGo === 'red'){
+        row = Math.floor(squareId/8)
+        col = Math.abs((squareId - (row*8)) - (8-1))
+    }else{
+        row = Math.floor((64-squareId)/8)
+        col = Math.abs(squareId%8)
+    }
+
+    return [col, row]
 }
 
 

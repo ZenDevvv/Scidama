@@ -5,10 +5,10 @@ body {
     justify-content: center;
     height: 100vh;
     align-items: center;
-    
 }
 
 #game-container {
+    height: 100vh;
     justify-content: center;
     flex-direction: column;
 }
@@ -16,22 +16,14 @@ body {
 #body-content {
     display: flex;
     justify-content: center;
-    align-items: center;
+    max-width: 916px;
+    max-width: 916px;
 }
 
-#move-history {
-    background-color: rgb(84, 86, 82);
-    border-color: rgb(51, 52, 51);
-    border-style: solid;
-    border-width: 8px;
-    height: 600px;
-    width: 350px;
-    margin: 5px;
-}
+
 #gameboard {
     width: 600px;
-    height: 600px;
-    margin: 10px;
+    aspect-ratio: 1/1;
     display: flex;
     flex-wrap: wrap;
     
@@ -40,19 +32,62 @@ body {
     border-color: #9C090C;
 }
 
-#score-board {
-    height: 300px;
-    width: 150px;
-    display: flex;
-    flex-wrap: wrap;
+#move-history {
+    background-color: rgb(84, 86, 82);
+    margin-left: 5px;
+    border-radius: 2px;
+
+    height: 600px;
+    width: 100%;
+    overflow: hidden; /* Hide overflow to prevent double scrollbars */
+}
+
+#move-history-content {
+    height: 100%; /* Set a fixed height to enable scrolling */
+    overflow: auto; /* Enable scrolling when content overflows */
+    padding: 10px 0; /* Add padding for better appearance */
+    overflow-y: auto;
+    font-size: 15px;
+    font-family: monospace;
+}
+
+
+#move-history-content div:nth-child(even) {
+    padding: 10px 0;
+    
+}
+#move-history-content div:nth-child(2n+1) {
+    padding: 10px 0;
     
 }
 
+/* ::-webkit-scrollbar {
+    width: 12px; 
+} */
+
+#score-board {
+    max-height: 616px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around
+}
+
+#player-score {
+    max-width: 100%;
+    margin-bottom: 10px;
+    margin-left: 5px;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row
+}
+
 #blue-score-board {
-    width: 150px;
+    width: 48%;
+    height: 100%;
     background-color: #006791;
-    border-radius: 20px;
-    margin: 5px;
+    border-radius: 5%;
+
 
     display: flex;
     justify-content: center;
@@ -60,10 +95,11 @@ body {
 }
 
 #red-score-board {
-    width: 150px;
+    width: 48%;
+    height: 100%;
     background-color: #9C090C;
-    border-radius: 20px;
-    margin: 5px;
+    border-radius: 5%;
+
 
     display: flex;
     justify-content: center;
@@ -91,8 +127,8 @@ span.score{
 
 
 img {
-    height: 69px;
-    margin: 3px;
+    height: 67px;
+    margin: 4px;
     justify-content: center;
     align-items: center;
 
