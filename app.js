@@ -581,6 +581,11 @@ function winCondition(){
         result += subtotal
     })
     appendHistory(`Subtotal = ${result}`)
+    if(playerGo === 'blue'){
+        appendHistory(`${result} + ${blueScore} = ${result+blueScore}`)
+    }else{
+        appendHistory(`${result} + ${redScore} = ${result+redScore}`)
+    }
     updateScoreBoard(result)
     
     setTimeout(() => showWin(), 1000)
