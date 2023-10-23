@@ -263,11 +263,11 @@ function mouseClick(e){
         setTimeout(() => transparentize(e), 2000)
         e.target.style.opacity = .5
 //  --------  all piece becomes king (for testing only. comment this out)----
-        const kingImage = document.createElement('img');
-        kingImage.src = 'assets/crown.png'; 
-        kingImage.classList.add('king-image');
-        e.target.classList.add('king')
-        e.target.appendChild(kingImage);
+        // const kingImage = document.createElement('img');
+        // kingImage.src = 'assets/crown.png'; 
+        // kingImage.classList.add('king-image');
+        // e.target.classList.add('king')
+        // e.target.appendChild(kingImage);
 // -------------------------------------------------------------------------
     }
 }
@@ -557,7 +557,7 @@ function winCondition(){
     let result = 0
     let subtotal
 
-    appendHistory('--------Remaining Chips-------')
+    appendHistory('---------Remaining Chips--------')
     const remaining = document.querySelectorAll('.piece')
     remaining.forEach(piece => {
         getPieceValue(piece, remainingPiece)
@@ -579,7 +579,6 @@ function winCondition(){
             }
         }
         result += subtotal
-        console.log(result)
     })
     appendHistory(`Subtotal = ${result}`)
     updateScoreBoard(result)
