@@ -43,6 +43,7 @@ body {
 }
 
 #move-history-content {
+    text-align: center;
     height: 100%; /* Set a fixed height to enable scrolling */
     overflow: auto; /* Enable scrolling when content overflows */
     padding: 10px 0; /* Add padding for better appearance */
@@ -156,6 +157,11 @@ path {
     position: relative;
     z-index: -10;  
 }
+
+
+
+
+
 
 .white {
     background-color: #dedece;

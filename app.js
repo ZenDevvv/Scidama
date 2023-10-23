@@ -74,6 +74,7 @@ const operator = [
 ]
 
 
+
 function createBoard() {
     startPieces.forEach((startPieces, i) => {
         const square = document.createElement('div')
@@ -262,11 +263,11 @@ function mouseClick(e){
         setTimeout(() => transparentize(e), 2000)
         e.target.style.opacity = .5
 //  --------  all piece becomes king (for testing only. comment this out)----
-        // const kingImage = document.createElement('img');
-        // kingImage.src = 'assets/crown.png'; 
-        // kingImage.classList.add('king-image');
-        // e.target.classList.add('king')
-        // e.target.appendChild(kingImage);
+        const kingImage = document.createElement('img');
+        kingImage.src = 'assets/crown.png'; 
+        kingImage.classList.add('king-image');
+        e.target.classList.add('king')
+        e.target.appendChild(kingImage);
 // -------------------------------------------------------------------------
     }
 }
@@ -484,7 +485,7 @@ function handleDropDrag(e){
 
         if(isCaptureValid) {
             if(normalValidMoves.includes(e.target)){
-                playSoundEffect('move-attack001')
+                playSoundEffect('move-normal001')
                 if(upLeftSkipMoves.includes(e.target)){
                     e.target.append(draggedElement)
                     removePiece(capturedUL.firstChild)
@@ -525,7 +526,7 @@ function handleDropDrag(e){
                 getPieceValue(draggedElement, attackPiece)
                 let [row, col] = getRowCol(e.target)
                 appendHistory(attackPiece.type+ `${attackPiece.value}->(${[row,col]})`)
-                playSoundEffect('move-normal001')
+                playSoundEffect('move-attack001')
                 e.target.append(draggedElement)
                 e.target.getAttribute('square-id')
                 if(kingsRow.includes(targetId)){
@@ -542,37 +543,45 @@ function handleDropDrag(e){
     if(bluePieceLeft.length == 0 || redPieceLeft.length == 0){
         playSoundEffect('endgame_win001')
         winCondition()
+
+
+        
+
     }
 }
 
-function calculateRemainingPiece(){
-    let score
-    if(remainingPiece.type === 'kwh'){
-        score = remainingPiece.value*pesoValue
-    }else{
-        score = remainingPiece.value
-    }
-    return score
-}
+
 
 function winCondition(){
-    let result = 0
-    if(bluePieceLeft.length == 0){
-        redPieceLeft.forEach(piece => {
-            getPieceValue(piece, remainingPiece)
-            piecePoints = calculateRemainingPiece()
-            result += piecePoints
-            console.log(result,piece.getAttribute('id'))
-        })
-    }else{
-        bluePieceLeft.forEach(piece => {
-            getPieceValue(piece, remainingPiece)
-            piecePoints = calculateRemainingPiece()
-            result += piecePoints
-            console.log(result,piece.getAttribute('id'))
-        })
-    }
     changePlayer()
+    let result = 0
+    let subtotal
+
+    appendHistory('--------Remaining Chips-------')
+    const remaining = document.querySelectorAll('.piece')
+    remaining.forEach(piece => {
+        getPieceValue(piece, remainingPiece)
+        if(remainingPiece.type === 'kwh'){
+            if(piece.classList.contains('king')){
+                subtotal = remainingPiece.value*2*pesoValue
+                appendHistory(`${remainingPiece.type+remainingPiece.value} * 2 *${pesoValue} = P${remainingPiece.value*2*pesoValue}`)
+            }else{
+                subtotal = remainingPiece.value*pesoValue
+                appendHistory(`${remainingPiece.type+remainingPiece.value} * ${pesoValue} = P${remainingPiece.value*pesoValue}`)
+            }
+        }else{
+            if(piece.classList.contains('king')){
+                subtotal = remainingPiece.value*2
+                appendHistory(`${remainingPiece.type+remainingPiece.value} * 2 = P${remainingPiece.value*2}`)
+            }else{
+                subtotal = remainingPiece.value
+                appendHistory(`${remainingPiece.type+remainingPiece.value}`)
+            }
+        }
+        result += subtotal
+        console.log(result)
+    })
+    appendHistory(`Subtotal = ${result}`)
     updateScoreBoard(result)
     
     setTimeout(() => showWin(), 1000)
